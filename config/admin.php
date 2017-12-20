@@ -151,6 +151,8 @@ return [
      * Settings for extensions.
      */
     'extensions' => [
-
+        'media-manager' => [
+            'disk' => 'admin_media'   // 指向config/filesystem.php中设置的disk
+        ],
     ],
 ];
