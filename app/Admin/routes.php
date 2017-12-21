@@ -14,5 +14,5 @@ Route::group([
 
     $router->resource('users', UserController::class);
 
-    $router->resource('tags', TagsController::class);
+    $router->resource('products', ProductsController::class);
 });

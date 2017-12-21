@@ -26,4 +26,16 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    public function setHeadAttribute($pictures)
+    {
+        if (is_array($pictures)) {
+            $this->attributes['head'] = json_encode($pictures);
+        }
+    }
+
+    public function getHeadAttribute($pictures)
+    {
+        return json_decode($pictures, true);
+    }
 }

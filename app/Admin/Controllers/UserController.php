@@ -84,6 +84,13 @@ class UserController extends Controller
             $grid->created_at('创建时间');
             $grid->updated_at('更新时间');
 
+            $grid->filter(function ($filter) {
+                $filter->disableIdFilter();
+                $filter->where(function($query){
+                    $query->where('name', 'like', "%{$this->input}%");
+                }, '姓名');
+            });
+
             $grid->tools(function ($tools) {
                 $tools->append(new UserGender());
             });
@@ -121,15 +128,16 @@ class UserController extends Controller
 
             $form->display('id', 'ID');
             $form->text('name', '姓名')->rules('required');
-            $form->text('email', '11')->rules('required');
-//            $form->password('password', '密码');
+            $form->text('email', '邮箱')->rules('required');
+            $form->password('password', '密码');
             $form->display('created_at', '新增时间');
             $form->ueditor('details', '内容');
+            $form->multipleImage('head')->removable();
             $form->disableReset();
 
 //            $form->setAction('admin/users');//设置表单提交的action
 
-            $form->image('head');
+//            $form->image('head');
 
             $form->saving(function (Form $form) {
                 if ($form->password && $form->model()->password != $form->password) {
