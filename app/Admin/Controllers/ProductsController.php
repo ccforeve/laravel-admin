@@ -93,6 +93,26 @@ class ProductsController extends Controller
             });
             $grid->created_at('添加时间');
             $grid->updated_at('更新时间');
+
+            //隐藏按钮
+            $grid->disableExport(); //禁用导出数据按钮
+            $grid->disableRowSelector(); //禁用行选择checkbox
+            $grid->disablePagination(); //禁用分页条
+
+            //数据过滤
+            $grid->filter(function ($filter) {
+                $filter->like('name', '商品名称');
+                $filter->equal('type', '类型')->radio([
+                    ''   => '全部类型',
+                    1    => '免费领取',
+                    2    => '套装',
+                ]);
+                $filter->equal('shelves', '上下架')->radio([
+                    ''   => '全部',
+                    0    => '下架',
+                    1    => '上架',
+                ]);
+            });
         });
     }
 

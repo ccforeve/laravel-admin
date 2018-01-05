@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\Product;
 use App\Models\Specification;
 
 use Encore\Admin\Form;
@@ -24,8 +25,8 @@ class SpecificationsController extends Controller
     {
         return Admin::content(function (Content $content) {
 
-            $content->header('header');
-            $content->description('description');
+            $content->header('规格列表');
+            $content->description('规格列表');
 
             $content->body($this->grid());
         });
@@ -41,8 +42,8 @@ class SpecificationsController extends Controller
     {
         return Admin::content(function (Content $content) use ($id) {
 
-            $content->header('header');
-            $content->description('description');
+            $content->header('修改规格');
+            $content->description('修改规格');
 
             $content->body($this->form()->edit($id));
         });
@@ -57,8 +58,8 @@ class SpecificationsController extends Controller
     {
         return Admin::content(function (Content $content) {
 
-            $content->header('header');
-            $content->description('description');
+            $content->header('新增规格');
+            $content->description('新增规格');
 
             $content->body($this->form());
         });
@@ -74,9 +75,29 @@ class SpecificationsController extends Controller
         return Admin::grid(Specification::class, function (Grid $grid) {
 
             $grid->id('ID')->sortable();
-
+            $grid->name('规格');
+            $grid->price('价格(元)');
+            $grid->product()->name('所属产品');
             $grid->created_at();
             $grid->updated_at();
+
+            //按钮禁用
+            $grid->disableExport();
+            $grid->disableRowSelector();
+
+            $grid->perPages([10, 20]);
+
+            //数据过滤
+            $grid->filter(function($filter){
+                // 在这里添加字段过滤器
+                $filter->like('name', '规格名');
+                // 查询关联数据
+                $filter->where(function ($query) {
+                    $query->whereHas('product', function ($query) {
+                        $query->where('name', 'like', "%{$this->input}%");
+                    });
+                }, '产品名');
+            });
         });
     }
 
@@ -88,8 +109,10 @@ class SpecificationsController extends Controller
     protected function form()
     {
         return Admin::form(Specification::class, function (Form $form) {
-
             $form->display('id', 'ID');
+            $form->text('name', '规格名');
+            $form->number('price', '价格');
+            $form->select('product_id', '所属商品')->options(Product::all()->pluck('name', 'id'));
 
             $form->display('created_at', 'Created At');
             $form->display('updated_at', 'Updated At');

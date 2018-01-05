@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -27,15 +27,21 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
-    public function setHeadAttribute($pictures)
+    /**
+     * 推广人
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function extension()
     {
-        if (is_array($pictures)) {
-            $this->attributes['head'] = json_encode($pictures);
-        }
+        return $this->belongsTo(User::class, 'p_id');
     }
 
-    public function getHeadAttribute($pictures)
+    /**
+     * 经销商
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function dealer()
     {
-        return json_decode($pictures, true);
+        return $this->belongsTo(User::class, 'dealer_id');
     }
 }
