@@ -6,35 +6,38 @@ use Encore\Admin\Admin;
 use Encore\Admin\Grid\Tools\AbstractTool;
 use Illuminate\Support\Facades\Request;
 
-class UserGender extends AbstractTool
+class UserGender
 {
-    protected function script()
+    protected $id;
+
+    public function __construct($id)
     {
-        $url = Request::fullUrlWithQuery(['gender' => '_gender_']);
-
-        return <<<EOT
-
-        $('input:radio.user-gender').change(function () {
-        
-            var url = "$url".replace('_gender_', $(this).val());
-        
-            $.pjax({container:'#pjax-container', url: url });
-        
-        });
-
-EOT;
+        $this->id = $id;
     }
 
-    public function render()
+    protected function script()
+    {
+        return <<<SCRIPT
+
+$('.grid-check-row').on('click', function () {
+
+    // Your code.
+    console.log($(this).data('id'));
+
+});
+
+SCRIPT;
+    }
+
+    protected function render()
     {
         Admin::script($this->script());
 
-        $options = [
-            'all'   => '全部',
-            'm'     => '男',
-            'f'     => '女',
-        ];
+        return "<a class='btn btn-xs btn-success fa fa-check grid-check-row' data-id='{$this->id}'></a>";
+    }
 
-        return view('admin.tools.gender', compact('options'));
+    public function __toString()
+    {
+        return $this->render();
     }
 }

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0,minimum-scale=1.0, maximum-scale=1.0,user-scalable=no">
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta content="black" name="apple-mobile-web-app-status-bar-style">
+  <title>登录</title>
+  <link rel="stylesheet" href="http://at.alicdn.com/t/font_onox0b2zeel8fr.css">
+  <link rel="stylesheet" href="http://wm.zhzxr.com/Public/css/reset.css">
+  <style>
+    h1,h2,h3{font-weight: normal;}
+    strong{font-weight: normal;}
+    img{display: block; width: 100%;}
+    html,body{height: 100%}
+    a,button{-webkit-tap-highlight-color: transparent;}
+    .flex{display: -webkit-flex; display: flex;}
+    .flexV{display: -webkit-flex; display: flex; flex-direction: column; -webkit-flex-direction: column;}
+    .hCenter{justify-content: center; -webkit-justify-content: center;}
+    .vCenter{align-content: center; -webkit-align-items: center;}
+    .center{justify-content: center; -webkit-justify-content: center; align-content: center; -webkit-align-items: center;}
+    .around{justify-content: space-around; -webkit-justify-content: space-around;}
+    .between{justify-content: space-between; -webkit-justify-content: space-between;}
+    .full{flex: 1; -webkit-flex: 1;}
+    .hSideBar{-webkit-overflow-scrolling: touch; overflow: auto}
+    .hSideBar::-webkit-scrollbar{display: none;}
+    .f10{font-size: 0.833em;}
+    .f14{font-size: 1.166em;}
+    .f16{font-size: 1.333em;}
+    .f18{font-size: 1.5em;}
+    .f20{font-size: 1.666em;}
+
+    #wrap{height: 100%;}
+    #header{position: relative; height: 44px; border-bottom: 1px solid #d5d9da;}
+    #header .back{position: absolute; padding: 0 5px; line-height: 44px;}
+    #header h1{text-align: center; line-height: 44px;}
+    #header .record{position: absolute; right: 0; top: 0; line-height: 44px; padding: 0 10px; color: #69BAFE;}
+    .title{background: #f2f4f4; height: 44px; padding: 0 10px;}
+    .title span{color: #FB4A0C;}
+    /**********************************登录页**************************************/
+    #login-main .forget{margin-left: 68%;text-decoration: underline;color:#75c0ff;}
+    #login-header{height: 248px; background-image: linear-gradient(0deg, #BCE5FF 0%, #65B8FF 100%);}
+    #login-header .logo{background: #fff;}
+    #login-header .logo,#center-header .userImg{margin-top: 50px; width: 90px; height: 90px; border: 3px solid #fff; border-radius: 50%; overflow: hidden;}
+    #login-header .txt{margin-top: 40px; color: #4a4a4a;}
+    #login-header a{color: #FB4A0C; text-decoration: underline;}
+    #forms{padding: 40px 48px 10px;}
+    #forms .input-item{border-bottom: 2px solid #f2f4f4; height: 70px;}
+    #forms input{display: block; padding: 0; text-align: center; line-height: 70px; border: none; width: 100%; letter-spacing: 2px;}
+    #login-footer{position: relative; height: 55px; background-image: linear-gradient(0deg, #BCE5FF 0%, #65B8FF 100%); color: #fff;}
+    #login-footer button{display: block; color: #fff; letter-spacing: 5px; padding: 0; border: none; background: none;}
+    #login-footer i{position: absolute; line-height: 55px; padding-right: 20px; right: 0;}
+  </style>
+</head>
+<body>
+<div id="wrap" class="flexV hSideBar">
+  <div id="login-main" class="full hSideBar">
+    <div id="scroll">
+      <div id="login-header" class="flexV vCenter">
+        <div class="logo"><img src="__INDEX__/images/logo.png" alt="logo"></div>
+      </div>
+      <form id="forms" action="/logining" class="flexV">
+        <div class="input-item">
+          <input type="text" class="f16" name="username" placeholder="账号" autocomplete="off" data-rule="*" data-errmsg="账号必须">
+        </div>
+        <div class="input-item">
+          <input type="password" class="f16" name="password" placeholder="密码" autocomplete="off" data-rule="*" data-errmsg="密码必须">
+        </div>
+      </form>
+      <a href="forgetPass" class="forget">忘记密码？</a>
+    </div>
+  </div>
+  <div class="flex" id="login-footer">
+    <button type="button" class="full f18 submit">登录</button>
+  </div>
+</div>
+<script>
+  var scroll = document.getElementById('scroll');
+  window.onresize = function () {
+    scroll.scrollIntoView(false);
+  };
+</script>
+<script src="https://s22.cnzz.com/z_stat.php?id=1270643347&web_id=1270643347" language="JavaScript"></script>
+</body>
+{js href="https://cdn.bootcss.com/jquery/2.2.0/jquery.min.js" /}
+{js href="__STATIC__/js/checkform.js"}
+{js href="__STATIC__/js/functions.js"}
+<script>
+    $('a').last().hide();
+
+    new checkForm({
+        form : '#forms',
+        btn : '.submit',
+        error : function (e,msg){
+            showMsg(msg,0);
+        },
+        complete : function (form){
+            // showProgress('请稍后...');
+            var url = form.getAttribute('action');
+            var datas = $(form).serializeArray();
+            if(typeof(editor) == 'object' && editor.html()) datas[datas.length - 1] = {name:'content',value:editor.html()};
+            $.post(url,datas,function(ret){
+                showMsg(ret.msg,ret.code);
+                if(ret.url) setTimeout(function (){window.location.href = "/User";},1000);
+            },'json');
+        }
+    });
+</script>
+</html>

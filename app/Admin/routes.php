@@ -12,6 +12,8 @@ Route::group([
 
     $router->get('/', 'HomeController@index');
 
+    $router->get('become_dealer/{user}', 'UserController@becomeDealer')->name('become_dealer');
+
     $router->resource('users', UserController::class);
 
     $router->resource('products', ProductsController::class);

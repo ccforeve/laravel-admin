@@ -135,7 +135,7 @@ class ProductsController extends Controller
             $form->number('sort', '排序')->help('越小越前');
             $form->radio('type', '类型')->options([1 => '免费', 2 => '套装']);
             $form->radio('shelves', '上下架')->options([0 => '下架', 1 => '上架']);
-            $form->url('audio', '音频链接');
+            $form->text('audio', '音频链接');
             $form->number('tl_free_num','限时免费数量');
             $form->number('tl_one_off','限时第一折扣');
             $form->number('tl_one_num','限时第一数量');

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<title>找回密码</title>
+{include file='index/header'}
+
+<body id="forgetPass" class="flexv">
+<div id="common-header" class="flex">
+    <a href="javascript:history.back()" class=" cBtn back"><i class="iconfont icon-back"></i></a>
+    <h1>找回密码</h1>
+</div>
+<form action="/forgetpassing" class="flexitemv scroll main" method="post">
+    <div class="block">
+        <label class="flex centerv row">
+            <span class="flex title">您的账号</span>
+            <input type="tel" name="phone" placeholder="请输入您的账号/手机号码" data-rule="m" data-errmsg="手机号码格式错误" class="flexitem input normal" maxlength="11">
+        </label>
+        <label class="flex centerv row">
+            <span class="flex title">短信验证码</span>
+            <input type="number" name="code" placeholder="短信验证码" data-rule="/^\d{6}$/" data-errmsg="验证码格式错误" class="flexitem input normal">
+            <a href="javascript:;" class="flex getcode" data-url="{:url('Login/phonecode')}">获取验证码</a>
+        </label>
+        <label class="flex centerv row">
+            <span class="flex title">新密码</span>
+            <input type="password" name="pwd" placeholder="请设置新密码" data-rule="pwd" data-errmsg="登录密码最少6位数" class="flexitem input normal">
+        </label>
+        <label class="flex centerv row">
+            <span class="flex title">确认密码</span>
+            <input type="password" name="repwd" placeholder="请再次输入新密码" data-sync="input[name=pwd]" data-errmsg="两次新密码不一致" class="flexitem input normal">
+        </label>
+    </div>
+    <a href="javascript:;" class="flex center submit">确认设置</a>
+</form>
+
+{js href="http://cdn.bootcss.com/zepto/1.1.6/zepto.min.js"}
+{js href="__STATIC__/js/functions.js"}
+{js href="__STATIC__/js/checkform.js"}
+<script src="https://s22.cnzz.com/z_stat.php?id=1270643347&web_id=1270643347" language="JavaScript"></script>
+<script>
+    $('a').last().hide();
+
+    var checker = new checkForm({
+        form: '.main',
+        btn: '.submit',
+        error: function (el, msg) {
+            showMsg(msg);
+        },
+        complete: function (el) {
+            var url = el.getAttribute('action');
+            var datas = $(el).serializeArray();
+            $.post(url,datas,function(ret){
+                showMsg(ret.msg,ret.code);
+                if(ret.url) setTimeout(function (){window.location.href = ret.url;},1000);
+            },'json');
+        }
+    });
+    $('.getcode').click(function () {
+        if($(this).hasClass('disable')) return false;
+        var msg = checker.check($('input[name=phone]').get(0));
+        if(msg){showMsg(msg); return false;}
+        var obj = $(this),url = $(this).attr('data-url'),phone = $('input[name=phone]').val();
+        obj.addClass('disable').text('正在发送...');
+        $.post(url,{phone : phone},function (ret){
+            if(ret.code == 1){
+                showMsg(ret.msg,ret.code);
+                setTimeout(function () {
+                    smsTimer(obj,'重新获取',60,'disable');
+                });
+            }else{
+                showMsg(ret.msg,ret.code);
+                setTimeout(function () {
+                    obj.removeClass('disable').text('获取验证码');
+                },1000);
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

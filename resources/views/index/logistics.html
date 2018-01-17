@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<title>物流信息</title>
+{include file='index/header'}
+
+<body id="logistics" class="flexv" style="background: #fff">
+<div id="common-header" class="flex">
+    <a href="javascript:history.back()" class="cBtn back"><i class="iconfont icon-back"></i></a>
+    <h1>物流详情</h1>
+</div>
+<div class="flexitemv scroll main">
+    <div class="state flex">
+        <img src="{:config('image_path')}{$photo}" alt="">
+        <div class="flexitemv content">
+            <p class="lt">物流状态：<span>{$express_type}</span></p>
+            <p class="flexv cp">
+                <span>承运公司：{$express_company}</span>
+                <span>运单编号：{$res.nu}</span>
+            </p>
+            <p class="tel">官方电话：<a href="tel:{$res.comcontact}">{$res.comcontact}</a></p>
+        </div>
+    </div>
+    <div class="company flex centerv">
+        <i class="iconfont icon-wuliu"></i>
+        <p>本数据由<a href="https://m.kuaidi100.com/">快递100</a>提供</p>
+    </div>
+    <ul class="list">
+        {volist name='res.data' id='v'}
+            <li {eq name='key' value='0'}class="active"{/eq}>
+                <div>
+                    <p>{$v.context}</p>
+                    <time>{$v.time}</time>
+                    <span class="spot"></span>
+                </div>
+            </li>
+        {/volist}
+    </ul>
+    <div class="bottom"></div>
+</div>
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://s22.cnzz.com/z_stat.php?id=1270643347&web_id=1270643347" language="JavaScript"></script>
+</body>
+<script>
+    $('a').last().hide();
+</script>
+</html>

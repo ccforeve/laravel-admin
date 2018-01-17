@@ -6,8 +6,10 @@
     "type": "project",
     "require": {
         "php": ">=7.0.0",
+        "barryvdh/laravel-ide-helper": "^2.4",
         "encore/laravel-admin": "1.5.*",
         "fideloper/proxy": "~3.3",
+        "hieu-le/active": "~3.5",
         "laravel-admin-ext/backup": "^1.0",
         "laravel-admin-ext/helpers": "^1.0",
         "laravel-admin-ext/log-viewer": "^1.0",
@@ -15,7 +17,10 @@
         "laravel-admin-ext/scheduling": "^1.0",
         "laravel/framework": "5.5.*",
         "laravel/tinker": "~1.0",
-        "maatwebsite/excel": "~2.1.0"
+        "maatwebsite/excel": "~2.1.0",
+        "overtrue/laravel-wechat": "~4.0",
+        "overtrue/wechat": "~4.0",
+        "yansongda/pay": "^2.0"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.1",
@@ -25,9 +30,13 @@
         "phpunit/phpunit": "~6.0"
     },
     "autoload": {
+        "files": [
+            "app/Console/handle.php"
+        ],
         "classmap": [
             "database/seeds",
-            "database/factories"
+            "database/factories",
+            "app/Classes"
         ],
         "psr-4": {
             "App\\": "app/"
@@ -54,6 +63,12 @@
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover"
+        ],
+        "post-update-cmd": [
+            "Illuminate\\Foundation\\ComposerScripts::postUpdate",
+            "php artisan ide-helper:generate",
+            "php artisan ide-helper:meta",
+            "php artisan optimize"
         ]
     },
     "config": {

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{include file='index/header'}
+
+<body id="index" class="flexv">
+<div class="flexitemv scroll main">
+    <div>
+        {eq name='Think.get.type' value='free'}
+            <img src="__INDEX__/images/banner-user.jpg" alt="" width="100%">
+        {else /}
+            <img src="__INDEX__/images/nouser.jpg" alt="" width="100%">
+        {/eq}
+    </div>
+    <div class="list">
+        {volist name='list' id='v'}
+        <div class="list__item">
+            <a href="{:url('prdDetail',['id'=>$v.id,'type'=>'expshop','pid'=>$Think.get.pid])}" class="list__link">
+                <div class="flex center list__bg">
+                    <img class="list__img" src="__UPLOAD__/{$v.p_photo}" alt="">
+                </div>
+                <img class="list__logo" src="__INDEX__/images/logo.png">
+                <div class="flexv list__content">
+                    <p class="list__name">{$v.p_name}</p>
+                    <div class="flex centerv list__details">
+                        <div class="list__num">
+                            <p class="list__price">¥ 0.00</p>
+                            <p class="list__recive">{php}echo 1865+$v['count'];{/php}人已领取</p>
+                        </div>
+                        <p class="flex center list__btn list__btn--default">立即<br>体验</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {/volist}
+    </div>
+</div>
+
+<div id="main-footer" class="flex">
+    <a href="/" class="flexitemv center active"><i class="iconfont icon-index"></i><span>网站首页</span></a>
+    <a href="/User" class="flexitemv center"><i class="iconfont icon-center"></i><span>用户中心</span></a>
+    <a href="javascript:;" class="flexitemv center" id="kefu"><i class="iconfont icon-cservice"></i><span>联系客服</span></a>
+    <a href="javascript:;" class="flexitemv center" id="xuzhi"><i class="iconfont icon-help"></i><span>领取须知</span></a>
+</div>
+<input type="hidden" id="notice" value='{:v("notice")}'>
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+{js href="__INDEX__/plugins/mobile/layer.js"}
+{js href="__INDEX__/js/common.js"}
+<script src="https://s22.cnzz.com/z_stat.php?id=1270643347&web_id=1270643347" language="JavaScript"></script>
+</body>
+<script>
+    $('a').last().hide();
+</script>
+</html>

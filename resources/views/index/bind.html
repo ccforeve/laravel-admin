@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<title>绑定微信</title>
+{include file='index/header'}
+
+<body id="bind" class="flexv">
+<div id="common-header" class="flex">
+    <a href="/User" class=" cBtn back"><i class="iconfont icon-back"></i></a>
+    <h1>微信绑定</h1>
+</div>
+<div class="flexitemv scroll main">
+    <div class="top"></div>
+    <div class="flex title">
+        <div class="img">
+            {eq name='user.u_openid' value=''}
+            <img src="images/1.jpg" alt="">
+            {else /}
+            <img src="{$user.u_head}" alt="">
+            {/eq}
+        </div>
+        <div class="flexv text">
+            {eq name='user.u_openid' value=''}<p>尚未绑定</p>{else /}<p>已绑定</p>{/eq}
+            <span>您当前{eq name='user.u_openid' value=''}尚未{else /}已{/eq}绑定微信</span>
+        </div>
+    </div>
+    <div class="flexv centerv content">
+        <img src="__ROOT__/ewm1.jpg" alt="">
+        <h2>长按识别二维码加关注！</h2>
+        <h3>关注公众号后可通过公众号直接登录！</h3>
+        {eq name='user.u_openid' value=''}
+            <a href="https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx265181817d417228&redirect_uri={$url}&response_type=code&scope=snsapi_userinfo&state=Sate#wechat_redirect" class="flex center bind">立即绑定</a>
+            {else /}
+            <a href="javascript:;" class="flex center unbind" data-url="{:url('WechatServer/bindWechat')}">解除绑定</a>
+        {/eq}
+    </div>
+</div>
+<script src="https://s22.cnzz.com/z_stat.php?id=1270643347&web_id=1270643347" language="JavaScript"></script>
+</body>
+{js href="https://cdn.bootcss.com/jquery/2.0.0/jquery.min.js"}
+{js href="__STATIC__/js/functions.js"}
+<script>
+    $('a').last().hide();
+
+    $('.unbind').click(function () {
+        var url = $(this).attr('data-url');
+        $.get(url,function (ret) {
+            showMsg(ret.msg,ret.code);
+            setTimeout(function () {
+                window.location.reload();
+            },1000)
+        })
+    })
+</script>
+</html>

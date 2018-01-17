@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<title>订单详情</title>
+{include file='index/header'}
+
+<body id="order-detail" class="flexv">
+<div id="common-header" class="flex">
+    <a href="javascript:history.back()" class="cBtn back"><i class="iconfont icon-back"></i></a>
+    <h1>订单详情</h1>
+</div>
+<div class="flexitemv scroll main">
+    <div class="flex centerv address">
+        <i class="iconfont icon-address"></i>
+        {if condition='$res.address neq ""'}
+        <div class="flexitemv content">
+            <p class="flex"><span class="uname">{$res.address.name}</span><span class="tel">{$res.address.phone}</span></p>
+            <span class="intro">{$res.address.province}{$res.address.detail}</span>
+        </div>
+        {else /}
+        <div class="flexitemv content">
+            <p class="flex"><span class="uname">{$res.i_uname}</span><span class="tel">{$res.i_phone}</span></p>
+            <span class="intro">{$res.i_detail}</span>
+        </div>
+        {/if}
+    </div>
+    <div class="tips">
+        <div class="flex centerv item">
+            <p>订单号</p>
+            <span>{$res.i_number}</span>
+        </div>
+        {neq name='$res.is_logistics' value=''}
+        <div class="flex item" style="height: auto;">
+            <a href="javascript:;" data-url="{eq name='logistics.status' value='1'}{:url('User/islogistics',['id'=>$res.id])}{/eq}" class="flexitem centerv {eq name='logistics.status' value='1'}logistics{/eq}">
+                <i class="iconfont icon-wuliu" style="color: green;"></i>
+                <div class="flexitemv text" style="padding: 10px 5px 10px 10px;">
+                    {eq name='logistics.status' value='1'}
+                    <p style="color: green;padding-bottom: 5px;">{$logistics.data.0.context}</p>
+                    <time style="color: #999;">{$logistics.data.0.time}</time>
+                    {else /}
+                    <p style="color: green;padding-bottom: 5px;">{$logistics.message}</p>
+                    {/eq}
+                </div>
+                <i class="iconfont icon-go"></i>
+            </a>
+        </div>
+        {/neq}
+    </div>
+    <div class="flex goods-item">
+        <a href="{:url('index/prdDetail',['id'=>$res.i_pid])}" class="flexitem">
+            <div class="img"><img src="{:config('image_path')}{$res.product.p_ddphoto}" alt=""></div>
+            <div class="flexitemv content">
+                <h2>{$res.product.p_name}</h2>
+                <p>
+                    {eq name='res.i_type' value='1'}
+                        免费领取  /  快递费
+                        {if condition='($res.activity eq 1)'}
+                            ¥ 0.01
+                        {elseif condition='($res.activity eq 2)'}
+                            ¥ 10.00
+                        {elseif condition='($res.activity eq 3)'}
+                            ¥ 15.00
+                        {/if}
+                    {else /}
+                        常规套装
+                    {/eq}
+                </p>
+                <span>¥ {:round($res.product.p_price,2)}</span>
+            </div>
+        </a>
+    </div>
+    <div class="details">
+        <div class="flex centerv item">
+            <p>商品价格</p>
+            <span>¥ {:round($res.product.p_price,2)}</span>
+        </div>
+        {eq name='res.i_type' value='1'}
+            <div class="flex centerv item">
+                <p>快递费</p>
+                <span>
+                    {if condition='($res.activity eq 1)'}
+                        ¥ 0.01
+                    {elseif condition='($res.activity eq 2)'}
+                        ¥ 10.00
+                    {elseif condition='($res.activity eq 3)'}
+                        ¥ 15.00
+                    {/if}
+                </span>
+            </div>
+            {neq name='res.i_spec' value=''}
+                <div class="flex centerv item">
+                    <p>商品规格</p>
+                    <span>{$res.spec.s_name} / ¥ {$res.spec.s_price}</span>
+                </div>
+            {/neq}
+        {/eq}
+        {neq name='res.i_uintegral' value='0'}
+        <div class="flex centerv item">
+            <p>使用积分</p>
+            <span>{$res.i_uintegral}</span>
+        </div>
+        {/neq}
+        <div class="flex centerv item special">
+            <p>合计费用：<strong>¥ {:round($res.i_totprice,2)}</strong></p>
+        </div>
+    </div>
+    {if condition='($res.i_status eq 0) and ($res.i_istatus neq 1)'}
+    <div class="flex center pay">
+        <a href="javascript:" data-url="{:url('Indent/payorder',['indent_id'=>$res.id, 'type'=>2])}" class="flex center pay__alipay pay__btn">支付宝支付</a>
+        <a href="javascript:" data-url="{:url('Indent/payorder',['indent_id'=>$res.id, 'type'=>1])}" class="flex center pay__weipay pay__btn">微信支付</a>
+    </div>
+    {/if}
+</div>
+<script src="https://s22.cnzz.com/z_stat.php?id=1270643347&web_id=1270643347" language="JavaScript"></script>
+</body>
+{js href="https://cdn.bootcss.com/jquery/2.0.0/jquery.min.js"}
+{js href="__STATIC__/js/functions.js"}
+<script>
+    $('a').last().hide();
+
+    $('.logistics').click(function () {
+        var url = $(this).attr('data-url');
+        window.location.href = url;
+    });
+
+    $('.pay__btn').click(function () {
+        var url = $(this).attr('data-url');
+        $.get(url,function (ret) {
+            if(ret.status =='success') {
+                window.location.href = ret.url;
+            } else {
+                showMsg(ret.msg, 0, 2000);
+                setTimeout(function () {
+                    window.location.reload();
+                }, 2000)
+            }
+        })
+    })
+</script>
+</html>

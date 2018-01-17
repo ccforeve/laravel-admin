@@ -7,4 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class UseIntegral extends Model
 {
     protected $table = 'use_integrals';
+
+    protected $fillable = ['user_id', 'mean', 'order_id', 'use_integral', 'type'];
+
+    public function status($integral, $order_id, $status)
+    {
+        if($integral) {
+            UseIntegral::where('order_id', $order_id)->update(['status' => $status]);
+        }
+    }
 }
