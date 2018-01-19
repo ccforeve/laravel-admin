@@ -153,6 +153,8 @@ class PayNotifyController extends Controller
 
         //发送短信通知
         $address = Address::where('id', $order->address_id)->first();
-        $this->sms($address->phone, 71275, [], '购买成功通知');
+        $appid = 1400058384;
+        $appkey = "ea50aedaecf4b8821410bb4822b71d20";
+        $this->sms($appid, $appkey, $address->phone, 71275, [], '购买成功通知');
     }
 }

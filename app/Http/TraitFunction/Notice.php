@@ -7,10 +7,8 @@ use App\Classes\Sms\SmsSender;
 trait Notice
 {
     //发送短信
-    public function sms( $phone, $templId, $params, $notice_msg )
+    public function sms( $appid, $appkey, $phone, $templId, $params, $notice_msg )
     {
-        $appid = 1400058384;
-        $appkey = "ea50aedaecf4b8821410bb4822b71d20";
         $sms = new SmsSender($appid, $appkey);
         $result = $sms->sendWithParam("86", $phone, $templId, $params);
         $arr = json_decode($result, true);

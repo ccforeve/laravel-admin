@@ -189,8 +189,10 @@ class OrdersController extends Controller
             app(UseIntegral::class)->status($order->use_integral, $order->id, 2);
         } elseif($type == 1) {//删除订单
             $order->delete();
+            //删除积分
+            app(UseIntegral::class)->delete();
             //积分状态修改
-            app(UseIntegral::class)->status($order->use_integral, $order->id, 2);
+//            app(UseIntegral::class)->status($order->use_integral, $order->id, 2);
         } elseif($type == 5) {//取消订单
             $order->where('id', $order->id)->update(['is_status' => 3]);
             //积分状态修改

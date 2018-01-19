@@ -59,7 +59,13 @@ Route::middleware(['simulation', 'wechat.oauth:snsapi_userinfo', 'userinfo'])->g
     //积分兑换操作
     $route->post('exchange_operation', 'ExtensionController@exchangeOperation')->name('index.exchange_operation');
     //绑定提现账户页面
-    $route->view('card_bind', 'index.card_bind')->name('index.card_bind');
+    $route->get('card_bind', 'BindController@index')->name('index.card_bind');
+    //获取验证码
+    $route->post('get_code', 'BindController@cardBind')->name('index.get_code');
+    //验证验证码并绑定提现账户操作
+    $route->post('check_code', 'BindController@checkCode')->name('index.check_code');
+    //提现记录
+    $route->get('record', 'ExtensionController@record')->name('index.record');
 });
 
 //微信支付异步回调通知

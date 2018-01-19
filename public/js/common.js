@@ -5,7 +5,7 @@ var kefu = document.querySelector('#kefu');
 if (kefu) {
     kefu.addEventListener('click', function () {
         layer.open({
-            content: '<div class="flexv center ins"><img src="/kefu.jpg" alt=""><p>长按二维码添加关注</p></div>'
+            content: '<div class="flexv center ins"><img src="/index_images/kefu.jpg" alt=""><p>长按二维码添加关注</p></div>'
             , btn: ['取消']
             ,anim: 'up'
             , skin: 'footer'

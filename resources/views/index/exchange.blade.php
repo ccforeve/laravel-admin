@@ -4,7 +4,7 @@
 <div id="common-header" class="flex">
     <a href="javascript:history.back()" class=" cBtn back"><i class="iconfont icon-back"></i></a>
     <h1>积分兑换</h1>
-    <a href="record" class="cBtn exchange"><span>记录</span></a>
+    <a href="{{ route('index.record') }}" class="cBtn exchange"><span>记录</span></a>
 </div>
 <div class="flexitemv main">
     <div class="flex switch-btn">

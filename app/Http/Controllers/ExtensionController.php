@@ -15,7 +15,6 @@ use App\Models\User;
 use Carbon\Carbon;
 use EasyWeChat\Factory;
 use Illuminate\Http\Request;
-use Tests\Seeds\UserTableSeeder;
 
 class ExtensionController extends Controller
 {
@@ -77,24 +76,29 @@ class ExtensionController extends Controller
         return view('index.exchange', compact('suit', 'free', 'exchange_time'));
     }
 
+    /**
+     * 积分提现操作
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function exchangeOperation( Request $request )
     {
         $user_id = session('user_id');
         //--------------判断是否已绑定银行卡----------------
         $user = User::find($user_id);
-        if(empty($user->bank_name)){
+        if(empty($user->bank_name) && empty($user->bank_number)){
             return response()->json(['state' => 401, 'error' => '你未绑定银行卡或支付宝', 'url' => route('index.card_bind')]);
         }
         //--------------判断是否已绑定银行卡END-------------
         $data = $request->all();
-        $data['integral'] = $data['integral'] > 200 ? 200 : $data['integral'];
+        $data['use_integral'] = $data['integral'] > 200 ? 200 : $data['integral'];
 
         if($data['type']==1){
-            if(Carbon::now()->gt(Carbon::parse($user->exchange_time))){
+            if(Carbon::now()->lt(Carbon::parse($user->exchange_time))){
                 return response()->json(['state' => 401, 'error' => '未到兑换时间']);
             }
             //免费领取积分时间增加一个月
-            User::where('id', $user_id)->update(['exchange_time' => Carbon::now()->addMinute()]);
+            User::where('id', $user_id)->update(['exchange_time' => Carbon::now()->addMonth()]);
         }
 
         $data['user_id'] = $user_id;
@@ -103,5 +107,13 @@ class ExtensionController extends Controller
         UseIntegral::create($data);
 
         return response()->json(['state' => 0, 'error' => '兑换完成']);
+    }
+
+
+    public function record()
+    {
+        $use_integrals = UseIntegral::where('user_id', session('user_id'))->get();
+
+        return view('index.record_list', compact('use_integrals'));
     }
 }

@@ -34,7 +34,7 @@
             </a>
         </li>
         <li class="flexitemv">
-            <a href="" class="flexitemv center">
+            <a href="{{ route('index.card_bind') }}" class="flexitemv center">
                 <p class="flex center icon"><i class="iconfont icon-card" style="color: red;"></i></p>
                 <p>银行卡绑定</p>
             </a>
