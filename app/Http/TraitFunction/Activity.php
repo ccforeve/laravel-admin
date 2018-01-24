@@ -76,10 +76,10 @@ trait Activity
                         //订单价格变更为第二折扣价
                         return ['activity' => 3];
                     }
-                } else {
-                    //订单价格变更为折扣价
-                    return [ 'activity' => 2 ];
+                    return ['activity' => 0 ];
                 }
+                //订单价格变更为折扣价
+                return [ 'activity' => 2 ];
             }
 
             return ['activity' => 1];
@@ -110,6 +110,8 @@ trait Activity
                     //订单价格变更为第二折扣价
                     return [ 'activity' => 3 ];
                 }
+                //订单恢复活动价
+                return [ 'activity' => 0 ];
             }
 
             return [ 'activity' => 2 ];
