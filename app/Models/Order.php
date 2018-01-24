@@ -10,7 +10,7 @@ class Order extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['product_id', 'product_type', 'original_price', 'pay_price', 'use_integral', 'address_id', 'complete'];
+    protected $fillable = ['product_id', 'product_type', 'original_price', 'pay_price', 'use_integral', 'address_id', 'complete', 'spec_id', 'activity'];
 
     //关联产品
     public function product()

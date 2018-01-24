@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\TraitFunction;
+namespace App\Http\TraitFunction;
 
 use App\Classes\Sms\SmsSender;
 

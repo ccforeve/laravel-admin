@@ -20,7 +20,7 @@
         <a href="{{ route('index.order_list', ['status'=>1,'confirm'=>2]) }}" class="flexitemv center {{ active_class(if_route_param('confirm', 2), 'on') }}"><span>已完成</span></a>
     </div>
     <ul class="list">
-        @if(count($order_lists))
+        @if($order_lists->isNotEmpty())
             @foreach($order_lists as $list)
             <li>
                 <div class="flex centerv title">
@@ -85,14 +85,14 @@
                                     @endif
                                 </p>
                             @endif
-                            <span>¥ {{ number_format($list->product['price']) }}</span>
+                            <span>¥ {{ number_format($list->product['price'], 2) }}</span>
                         </div>
                     </a>
                 </div>
 
                 <div class="flex centerv bottom">
                     <div class="flexitemv tips">
-                        <p>合计：<span>¥ {{ number_format($list->pay_price) }}</span></p>
+                        <p>合计：<span>¥ {{ number_format($list->pay_price, 2) }}</span></p>
                         <time>{{ $list->create_at }}</time>
                     </div>
                     <div class="flex centerv operation">

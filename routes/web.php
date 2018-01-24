@@ -15,7 +15,7 @@ Route::middleware(['simulation', 'wechat.oauth:snsapi_userinfo', 'userinfo'])->g
     //商城首页
     $route::get('index/{pid?}', 'IndexController@index')->name('index');
     //商品详情页
-    $route::get('product_details/{product}/{pid?}', 'IndexController@productDetails')->name('index.product_details');
+    $route::get('product_details/{product}', 'IndexController@productDetails')->name('index.product_details');
     //免费领取列表或体验列表
     $route->get('product_list/{type}', 'IndexController@productList')->name('index.product_list');
     //判断用户是否购买套装后跳转

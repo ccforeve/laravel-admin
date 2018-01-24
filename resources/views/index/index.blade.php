@@ -3,14 +3,14 @@
 <body id="index" class="flexv">
 <div class="flexitemv scroll main">
     <div class="banner">
-        <a href="{{ route('index.product_details', ['produst'=>1, 'pid'=>session('pid')]) }}"><img src="/index_images/banner.jpg" alt=""></a>
+        <a href="{{ route('index.product_details', 1) }}"><img src="/index_images/banner.jpg" alt=""></a>
     </div>
     <div>
         <div style="float: left;width: 47%; margin: 0 2%; box-sizing: border-box; border: 2px solid green;">
-            <a href="{{ route('index.product_details', ['produst'=>1, 'pid'=>session('pid')]) }}"><img src="/index_images/tz1.jpg" alt=""></a>
+            <a href="{{ route('index.product_details', 1) }}"><img src="/index_images/tz1.jpg" alt=""></a>
         </div>
         <div style="float: left;width: 47%;margin-right: 2%; box-sizing: border-box; border: 2px solid green;">
-            <a href="{{ route('index.product_details', ['produst'=>1, 'pid'=>session('pid')]) }}"><img src="/index_images/tz2.jpg" alt=""></a>
+            <a href="{{ route('index.product_details', 1) }}"><img src="/index_images/tz2.jpg" alt=""></a>
         </div>
     </div>
 

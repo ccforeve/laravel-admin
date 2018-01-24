@@ -8,6 +8,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\TraitFunction\Activity;
 use App\Models\Address;
 use App\Models\Integral;
 use App\Models\Order;
@@ -22,6 +23,8 @@ use Illuminate\Http\Request;
 
 class OrdersController extends Controller
 {
+    use Activity;
+
     private static function orderNumber(){
         return date('YmdHis') . substr(implode(NULL, array_map('ord', str_split(substr(uniqid(), 7, 13), 1))), 0, 8) . rand(10000, 99999);
     }
@@ -34,6 +37,26 @@ class OrdersController extends Controller
      */
     public function order( Request $request, Order $order )
     {
+        $product = Product::find($request->product_id);
+        if($product->stock == 0 || $product->shelves == 0) {
+            return response()->json(['state' => 401, 'error' => '该商品已下架或售罄']);
+        }
+
+        //活动是否上线
+        if(isset($request->activity) && strtotime($product->tl_begin_time) < time() && strtotime($product->tl_end_time) > time()){
+            //检查未支付活动订单
+//            $activity = $this->activity($product);
+//            if(!$activity) {
+//                return response()->json(['state' => 401, 'error' => '你有尚未付款的订单，不可重复下单！', 'url' => route('index.order_detail', $product->id)]);
+//            }
+
+            //检查活动订单售罄情况
+            $check_order = $this->checkOrder($product, $request->activity);
+            if(isset($check_order['state']) && !$check_order['state']) {
+                return response()->json(['state' => 401, 'error' => $check_order['error']]);
+            }
+        }
+
         //检验是否购买过体验商品
         if($request->product_type == 3){
             $check_buy = Order::where(['product_id' => $request->product_id, 'product_type' => 3, 'status' => 1, 'is_status' => 0])->first();
@@ -44,7 +67,6 @@ class OrdersController extends Controller
 
         $user = User::find(session('user_id'));
         //添加订单
-        $product = Product::find($request->product_id);
         $order->fill($request->all());
         $order->number = self::orderNumber();
         $order->user_id = session('user_id');
@@ -54,9 +76,11 @@ class OrdersController extends Controller
         $order->save();
 
         //免费领取的其他属性
-        if($request->product_type != 2) {
-            $attr_id = OrderAttr::insertGetId($request->only('spec', 'packing', 'postage'));
-            $order->where('id', $order->id)->update(['order_attr_id' => $attr_id]);
+        if(strtotime($product->tl_begin_time) > time() && strtotime($product->tl_end_time) < time()) {
+            if ( $request->product_type != 2 && empty($request->activity) ) {
+                $attr_id = OrderAttr::insertGetId($request->only('spec', 'packing', 'postage'));
+                $order->where('id', $order->id)->update([ 'order_attr_id' => $attr_id ]);
+            }
         }
 
         return response()->json(['state' => 0, 'error' => '提交成功', 'url' => route('index.order_ready_pay', $order->id)]);
@@ -88,7 +112,17 @@ class OrdersController extends Controller
             }
         }
 
-        return view('index.order_pay', compact('order', 'order_attr', 'address', 'extra_postage', 'integral'));
+        if(strtotime($order->product->tl_begin_time) < time() && strtotime($order->product->tl_end_time) > time()) {
+            //检查活动订单售罄情况
+            $check_order = $this->checkOrder($order->product, $order->activity);
+            if(isset($check_order['state']) && !$check_order['state']) {
+                return response()->json(['state' => 401, 'error' => $check_order['error']]);
+            }
+
+            return view('index.activity.order_pay', compact('order', 'order_attr', 'address', 'extra_postage', 'integral', 'activity_check'));
+        } else {
+            return view('index.order_pay', compact('order', 'order_attr', 'address', 'extra_postage', 'integral'));
+        }
     }
 
     /**
@@ -99,9 +133,14 @@ class OrdersController extends Controller
      */
     public function orderPay( Request $request, Order $order )
     {
+        if($order->product->stock == 0 || $order->product->shelves == 0) {
+            return response()->json(['state' => 401, 'error' => '该商品已下架或售罄']);
+        }
+
         $data = $request->all();
         $data['complete'] = 1;
         $update = $order->update($data);
+
         if($update) {
             //偏远地区加邮费
             if(isset($request->postarea)) {
@@ -120,7 +159,7 @@ class OrdersController extends Controller
                 $ret = [
                     'state' => 0,
                     'error' => '提交成功',
-                    'url' => route('index.pay', ['type' => $request->pay_type, 'order' => $order->id, 'order_pay' => $click_pay['data']])
+                    'url' => $click_pay['url']
                 ];
                 return response()->json($ret);
             } else {
@@ -153,15 +192,19 @@ class OrdersController extends Controller
         $add = OrderPay::create($pay_data);
         if($first_pay) {
             if ( $add ) {
-                return [ 'state' => 0, 'data' => $add->id ];
+                if($pay_type == 1) {
+                    return [ 'state' => 0, 'url' => route('index.pay', [ 'type' => $pay_type, 'order' => $order_id, 'order_pay' => $add->id ]) ];
+                } else {
+                    return [ 'state' => 0, 'url' => route('index.alipay_ready', [ 'order' => $order_id, 'order_pay' => $add->id ]) ];
+                }
             }
             return [ 'state' => 500 ];
         } else {
             if ( $add ) {
                 if($pay_type == 1) {
-                    return response()->json([ 'state' => 0, 'url' => route('index.pay', [ 'type' => $pay_type, 'order' => $order_id, 'order_pay' => $add ]) ]);
+                    return response()->json([ 'state' => 0, 'url' => route('index.pay', [ 'type' => $pay_type, 'order' => $order_id, 'order_pay' => $add->id ]) ]);
                 } else {
-                    return response()->json([ 'state' => 0, 'url' => route('index.alipay_ready', [ 'order' => $order_id, 'order_pay' => $add ]) ]);
+                    return response()->json([ 'state' => 0, 'url' => route('index.alipay_ready', [ 'order' => $order_id, 'order_pay' => $add->id ]) ]);
                 }
             }
             return response()->json(['state' => 500, 'error' => '支付出错']);

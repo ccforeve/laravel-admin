@@ -1,6 +1,7 @@
+<title>商品详情</title>
+
 @include('index._header')
 
-<title>商品详情</title>
 <style>
     .details img{
         width: 100% !important;
@@ -25,7 +26,7 @@
             @foreach($orders as $order)
                 <div class="flex centerv msg-item swiper-slide">
                     @if($order->user['head'])
-                        <img src="{$v.user.u_head}">
+                        <img src="{{ $order->user->head }}">
                     @else
                         <img src="/index_images/head.jpg">
                     @endif
@@ -119,7 +120,7 @@
             </a>
         </div>
         <div class="flexv footer-minitem">
-            <a href="/User" class="flexitemv center">
+            <a href="/user" class="flexitemv center">
                 <i class="iconfont icon-center"></i>
                 <p>我的</p>
             </a>

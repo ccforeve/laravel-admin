@@ -8,24 +8,27 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Http\TraitFunction\activity;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Support\Facades\Cache;
 
 class IndexController extends Controller
 {
+    use Activity;
+
     public function index()
     {
         return view('index.index');
     }
 
-    public function productDetails( Product $product, $pid = 0 )
+    /**
+     * 订单详情
+     * @param Product $product
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function productDetails( Product $product )
     {
-        if($pid) {
-            session(['pid', $pid]);
-        }
-
         if(Cache::has('product'.$product->id)) {
             $product = Cache::get('product'.$product->id);
         } else {
@@ -36,7 +39,17 @@ class IndexController extends Controller
         //滚动订单列表
         $orders = Order::with('product','user')->where(['status' => 1, 'is_status' => 0])->orderBy('pay_at', 'desc')->limit(20)->get();
 
-        return view('index.product_details', compact('product', 'orders'));
+        if(strtotime($product->tl_begin_time) < time() && strtotime($product->tl_end_time) > time()) {
+            $check = $this->checkActivity($product);
+            if ( $check ) {
+                $activity_check = $check[ 'activity' ];
+            }
+            dd($check);
+
+            return view('index.activity.product_details', compact('product', 'orders', 'activity_check'));
+        } else {
+            return view('index.product_details', compact('product', 'orders'));
+        }
     }
 
     /**
@@ -70,7 +83,7 @@ class IndexController extends Controller
             if($is_buy_suit){
                 return response()->json(['state' => 0, 'url' => route('index.product_list', 'free')]);
             }else{
-                return response()->json(['state' => 401, 'error' => '请先购买套装后再免费领取', 'url' => route('index.product_details', ['product'=>1,'pid'=>session('pid')])]);
+                return response()->json(['state' => 401, 'error' => '请先购买套装后再免费领取', 'url' => route('index.product_details', ['product'=>1])]);
             }
         }
     }
