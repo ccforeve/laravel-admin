@@ -20,5 +20,9 @@ Route::group([
 
     $router->resource('spec', SpecificationsController::class);
 
+    $router->post('edit_address/{address}', 'OrderController@editAddress')->name('admin.edit_address');
+
     $router->resource('order_list', OrderController::class);
+
+
 });

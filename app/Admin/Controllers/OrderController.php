@@ -2,8 +2,9 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\Address;
 use App\Models\Order;
-
+use App\Admin\Extensions\Tools\OrderAddress;
 use App\Models\OrderAttr;
 use App\Models\OrderRefund;
 use App\Models\Specification;
@@ -13,6 +14,7 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Layout\Content;
 use App\Http\Controllers\Controller;
 use Encore\Admin\Controllers\ModelForm;
+use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
@@ -139,6 +141,12 @@ class OrderController extends Controller
             $grid->dealer()->nickname('经销商');
             $grid->remark('备注')->editable();
             $grid->updated_at('最后更新时间');
+
+            $grid->actions(function ($actions) {
+                $actions->disableDelete();
+                // 添加操作
+                $actions->append(new OrderAddress($actions->row->address['id'], $actions->row->address['name'], $actions->row->address['phone'],$actions->row->address['province'], $actions->row->address['detail']));
+            });
         });
     }
 
@@ -156,5 +164,11 @@ class OrderController extends Controller
             $form->display('created_at', 'Created At');
             $form->display('updated_at', 'Updated At');
         });
+    }
+
+    public function editAddress(Request $request, Address $address)
+    {
+        $address->update($request->all());
+        return response()->json(['state' => 0]);
     }
 }
