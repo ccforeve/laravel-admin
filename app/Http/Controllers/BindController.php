@@ -9,7 +9,7 @@
 namespace App\Http\Controllers;
 
 
-use App\Http\Controllers\TraitFunction\Notice;
+use App\Http\TraitFunction\Notice;
 use App\Models\User;
 use Illuminate\Http\Request;
 

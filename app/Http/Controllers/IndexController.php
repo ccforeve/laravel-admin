@@ -8,7 +8,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\TraitFunction\activity;
+use App\Http\TraitFunction\Activity;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Support\Facades\Cache;
@@ -44,7 +44,6 @@ class IndexController extends Controller
             if ( $check ) {
                 $activity_check = $check[ 'activity' ];
             }
-            dd($check);
 
             return view('index.activity.product_details', compact('product', 'orders', 'activity_check'));
         } else {

@@ -130,12 +130,13 @@
                 <input type="hidden" name="original_price" value="15" />
             @endif
             <input type="hidden" name="activity" value="3"><!-- 折扣活动标记 -->
-        @else
+        @elseif($activity_check == 4)
             @if($product->type ==2)
                 <input type="hidden" name="original_price" value="{{ $product->price }}" />
             @else
                 <input type="hidden" name="original_price" value="15" />
             @endif
+            <input type="hidden" name="activity" value="4"><!-- 活动恢复原价标记 -->
         @endif
 
         <div class="flexv centerv title">

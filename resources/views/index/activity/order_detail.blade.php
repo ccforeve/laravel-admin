@@ -44,14 +44,8 @@
                 <p>
                     @if($order->product_type == 1)
                         免费领取
-                    @elseif($order->product_type == 2)
-                        常规套装
                     @else
-                        体验商品
-                    @endif
-                    @if($order->product_type != 2)/
-                        @if($order->orderAttr['packing']) 正常包装 @else 不包装 @endif  /  邮费 ¥15
-                        @if($order->orderAttr['postage_area'])  /  偏远地区配送费 ¥10 @endif
+                        常规套装
                     @endif
                 </p>
                 <span>¥ {{ number_format($order->product->price, 2) }}</span>
@@ -63,36 +57,15 @@
             <p>商品价格</p>
             <span>¥ {{ number_format($order->product->price, 2) }}</span>
         </div>
-
-        @if($order->product_type != 2)
-            @if($order->orderAttr->packing)
-                <div class="flex centerv item">
-                    <p>包装费用</p>
-                    <span>¥ 5.00</span>
-                </div>
-            @endif
-            <div class="flex centerv item">
-                <p>配送费用</p>
-                <span>@if($order->orderAttr->postage_area)¥ 25.00(偏远地区加10元) @else ¥ 15.00 @endif</span>
-            </div>
-            @if($order->orderAttr['spec'])
-                <div class="flex centerv item">
-                    <p>商品规格</p>
-                    <span>{{ $order->orderAttr->specs->name }} ¥{{ $order->orderAttr->specs->price }}</span>
-                </div>
-            @endif
-        @endif
-        @if($order->use_integral)
-            <div class="flex centerv item">
-                <p>使用积分</p>
-                <span>{{ $order->use_integral }}</span>
-            </div>
-        @endif
+        <div class="flex centerv item">
+            <p>活动价格</p>
+            <span>¥ {{ number_format($order->pay_price, 2) }}</span>
+        </div>
         <div class="flex centerv item special">
             <p>合计费用：<strong>¥ {{ number_format($order->pay_price, 2) }}</strong></p>
         </div>
     </div>
-    @if($order->status == 0)
+    @if($order->status == 0 && $order->is_status == 0)
         <div class="flex center pay">
             <a href="javascript:" data-url="{{ route('order_detail_pay',['order_id'=>$order->id,'pay_type'=>2]) }}" class="flex center pay__alipay pay__btn">支付宝支付</a>
             <a href="javascript:" data-url="{{ route('order_detail_pay',['order_id'=>$order->id,'pay_type'=>1]) }}" class="flex center pay__weipay pay__btn">微信支付</a>

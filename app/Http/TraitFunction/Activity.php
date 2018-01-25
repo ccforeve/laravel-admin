@@ -71,12 +71,12 @@ trait Activity
 
                         if ( $two_count >= $product->tl_two_num ) {
                             //订单恢复活动价
-                            return ['activity' => 0 ];
+                            return ['activity' => 4 ];
                         }
                         //订单价格变更为第二折扣价
                         return ['activity' => 3];
                     }
-                    return ['activity' => 0 ];
+                    return ['activity' => 4 ];
                 }
                 //订单价格变更为折扣价
                 return [ 'activity' => 2 ];
@@ -89,7 +89,7 @@ trait Activity
 
             if ( $free_count >= $product->tl_free_num ) {
                 //订单价格回复原价
-                return [ 'activity' => 0];
+                return [ 'activity' => 4];
             }
 
             return ['activity' => 1];
@@ -105,13 +105,13 @@ trait Activity
 
                     if ( $two_count >= $product->tl_two_num ) {
                         //订单恢复活动价
-                        return [ 'activity' => 0 ];
+                        return [ 'activity' => 4 ];
                     }
                     //订单价格变更为第二折扣价
                     return [ 'activity' => 3 ];
                 }
                 //订单恢复活动价
-                return [ 'activity' => 0 ];
+                return [ 'activity' => 4 ];
             }
 
             return [ 'activity' => 2 ];

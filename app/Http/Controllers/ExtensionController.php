@@ -109,7 +109,10 @@ class ExtensionController extends Controller
         return response()->json(['state' => 0, 'error' => '兑换完成']);
     }
 
-
+    /**
+     * 积分兑换列表
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function record()
     {
         $use_integrals = UseIntegral::where('user_id', session('user_id'))->get();

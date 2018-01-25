@@ -45,7 +45,7 @@ Route::middleware(['simulation', 'wechat.oauth:snsapi_userinfo', 'userinfo'])->g
     //订单详情支付
     $route->get('order_detail_pay/{order_id}/{pay_type}', 'OrdersController@clickPay')->name('order_detail_pay');
     //订单状态操作
-    $route->get('order_operation/{order}/{type}/{msg?}', 'OrdersController@orderOperation')->name('index.order_operation');
+    $route->get('order_operation/{order}/{type}/{msg?}', 'OrderManagerController@orderOperation')->name('index.order_operation');
     //推广页面
     $route->get('reward', 'ExtensionController@index')->name('index.reward');
     //推广记录

@@ -67,7 +67,7 @@
                                     @elseif($list->product_type == 3)
                                         免费体验
                                     @endif
-                                    @if($list->product_type != 2)  /  快递费 ¥ {{ $list->pay_price }}@endif
+                                      /  活动订单
                                 </p>
                             @else
                                 <p>
@@ -76,10 +76,10 @@
                                     @elseif($list->product_type == 2)
                                         常规套装
                                     @elseif($list->product_type == 3)
-                                        免费体验
+                                        体验商品
                                     @endif
                                     @if($list->product_type != 2)
-                                        @if($list->orderAttr)  /  {{ $list->orderAttr->specs->name }} ¥{{ $list->orderAttr->specs->price }} @endif /
+                                        @if(count($list->orderAttr->specs))  /  {{ $list->orderAttr->specs->name }} ¥{{ $list->orderAttr->specs->price }} @endif /
                                         @if($list->orderAttr['packing'])正常包装 ¥5 @else 不包装 @endif  /  邮费 ¥15
                                         @if($list->orderAttr['postage_area'])/  偏远地区配送费 ¥10 @endif
                                     @endif

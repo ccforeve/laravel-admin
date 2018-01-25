@@ -69,13 +69,15 @@
             </div>
 
             @if($order->product_type != 2)
-                <div class="flex centerv item">
-                    <p>规格</p>
-                    <span class="spec-price">@if($order->orderAttr['spec']){{ $order_attr->name }} / ¥ {{ number_format($order_attr->price) }} @else 无可选规格 @endif</span>
-                </div>
+                @if(count($order->orderAttr->sepcs))
+                    <div class="flex centerv item">
+                        <p>规格</p>
+                        <span class="spec-price">@if(count($order->orderAttr->sepcs)){{ $order->orderAttr->specs->name }} / ¥ {{ number_format($order->orderAttr->specs->price) }} @else 无可选规格 @endif</span>
+                    </div>
+                @endif
                 <div class="flex centerv item">
                     <p>包装费用</p>
-                    <span class="pack-price">@if($order_attr->packing == 1) 不包装 @else ¥ 5.00 @endif</span>
+                    <span class="pack-price">@if($order->orderAttr->packing == 1) 不包装 @else ¥ 5.00 @endif</span>
                 </div>
             @endif
 

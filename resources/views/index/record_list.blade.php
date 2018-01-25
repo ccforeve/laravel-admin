@@ -17,7 +17,15 @@
                 </div>
                 <div class="flexv center text">
                     <p>{{ $integral->use_integral }}</p>
-                    <span>@if($integral->status == 1) <color style="color: green">兑换成功</color> @else <color style="color: red">兑换失败</color> @endif</span>
+                    <span>
+                        @if($integral->status == 1)
+                            <color style="color: green">兑换完成</color>
+                        @elseif($integral->status == 2)
+                            <color style="color: red">兑换失败</color>
+                        @else
+                            <color style="color: grey">兑换待完成</color>
+                        @endif
+                    </span>
                 </div>
                 @if($integral->order_id)<i class="iconfont icon-go"></i>@endif
             </a>

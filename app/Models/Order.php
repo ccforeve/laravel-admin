@@ -24,6 +24,16 @@ class Order extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function extension()
+    {
+        return $this->belongsTo(User::class, 'p_id');
+    }
+
+    public function dealer()
+    {
+        return $this->belongsTo(User::class, 'dealer_id');
+    }
+
     //关联物流
     public function logistic()
     {

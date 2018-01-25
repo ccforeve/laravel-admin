@@ -18,7 +18,7 @@ class CreateProductsTable extends Migration
             $table->string('name')->comment('产品名');
             $table->float('original_price')->comment('原价');
             $table->float('price')->comment('现价');
-            $table->json('photo')->comment('产品图/详情产品图/订单产品图')->nullable();
+            $table->string('photo')->comment('产品图/详情产品图/订单产品图')->nullable();
             $table->tinyInteger('type')->comment('产品类型（1:免费领取 2:套装）');
             $table->text('details')->comment('产品详情');
             $table->tinyInteger('sort')->comment('排序');

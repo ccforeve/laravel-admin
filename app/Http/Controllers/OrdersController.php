@@ -14,7 +14,6 @@ use App\Models\Integral;
 use App\Models\Order;
 use App\Models\OrderAttr;
 use App\Models\OrderPay;
-use App\Models\OrderRefund;
 use App\Models\Product;
 use App\Models\Specification;
 use App\Models\UseIntegral;
@@ -76,7 +75,7 @@ class OrdersController extends Controller
         $order->save();
 
         //免费领取的其他属性
-        if(strtotime($product->tl_begin_time) > time() && strtotime($product->tl_end_time) < time()) {
+        if(strtotime($product->tl_begin_time) > time() || strtotime($product->tl_end_time) < time()) {
             if ( $request->product_type != 2 && empty($request->activity) ) {
                 $attr_id = OrderAttr::insertGetId($request->only('spec', 'packing', 'postage'));
                 $order->where('id', $order->id)->update([ 'order_attr_id' => $attr_id ]);
@@ -95,8 +94,8 @@ class OrdersController extends Controller
     {
         session(['order_id' => $order->id]);
 
-        $order = $order->with('product', 'orderAttr')->where('id', $order->id)->first();
-        $order_attr = Specification::where('id', $order->orderAttr['spec'])->first();
+        $order = $order->with('product', 'orderAttr.specs')->where('id', $order->id)->first();
+//        $order_attr = Specification::where('id', $order->orderAttr['spec'])->first();
 
         //用户套装积分
         $integral = app(Integral::class)->integral(session('user_id'), 2);
@@ -113,15 +112,9 @@ class OrdersController extends Controller
         }
 
         if(strtotime($order->product->tl_begin_time) < time() && strtotime($order->product->tl_end_time) > time()) {
-            //检查活动订单售罄情况
-            $check_order = $this->checkOrder($order->product, $order->activity);
-            if(isset($check_order['state']) && !$check_order['state']) {
-                return response()->json(['state' => 401, 'error' => $check_order['error']]);
-            }
-
-            return view('index.activity.order_pay', compact('order', 'order_attr', 'address', 'extra_postage', 'integral', 'activity_check'));
+            return view('index.activity.order_pay', compact('order', 'address', 'extra_postage', 'integral', 'activity_check'));
         } else {
-            return view('index.order_pay', compact('order', 'order_attr', 'address', 'extra_postage', 'integral'));
+            return view('index.order_pay', compact('order', 'address', 'extra_postage', 'integral'));
         }
     }
 
@@ -135,6 +128,14 @@ class OrdersController extends Controller
     {
         if($order->product->stock == 0 || $order->product->shelves == 0) {
             return response()->json(['state' => 401, 'error' => '该商品已下架或售罄']);
+        }
+        if(strtotime($order->product->tl_begin_time) < time() && strtotime($order->product->tl_end_time) > time()) {
+            //检查活动订单售罄情况
+            $check_order = $this->checkOrder($order->product, $order->activity);
+            if ( isset($check_order[ 'state' ]) && !$check_order[ 'state' ] ) {
+                $order->delete();
+                return response()->json([ 'state' => 401, 'error' => $check_order[ 'error' ], 'url' => route('index.product_details', $order->product->id) ]);
+            }
         }
 
         $data = $request->all();
@@ -211,37 +212,4 @@ class OrdersController extends Controller
         }
     }
 
-
-    public function orderOperation(Order $order, $type, $msg='')
-    {
-        if($type == 4){ //确认收货
-            $order->update(['comfirm' => 2]);
-            //经销商和推广人获得的积分变为确认积分
-            Integral::where('order_id', $order->id)->update(['status' => 2]);
-            //售后订单更改为已完成
-
-            //积分状态修改
-            app(UseIntegral::class)->status($order->use_integral, $order->id, 1);
-        } elseif($type == 2 || $type == 3) {//申请退款
-            //经销商和推广人获得的积分变为退款积分
-            Integral::where('order_id', $order->id)->update(['status' => 3]);
-            //添加退款申请时间
-            $refund = OrderRefund::create(['apply_at' => date('Y-m-d H:i:s')]);
-            $order->where('id', $order->id)->update(['order_refund_id' => $refund->id, 'is_status' => 1]);
-            //积分状态修改
-            app(UseIntegral::class)->status($order->use_integral, $order->id, 2);
-        } elseif($type == 1) {//删除订单
-            $order->delete();
-            //删除积分
-            app(UseIntegral::class)->delete();
-            //积分状态修改
-//            app(UseIntegral::class)->status($order->use_integral, $order->id, 2);
-        } elseif($type == 5) {//取消订单
-            $order->where('id', $order->id)->update(['is_status' => 3]);
-            //积分状态修改
-            app(UseIntegral::class)->status($order->use_integral, $order->id, 2);
-        }
-
-        return response()->json(['status' => 0, 'error' => $msg.'完成']);
-    }
 }

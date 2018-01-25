@@ -66,7 +66,7 @@
 
         @if($product->type == 1)
             <div class="spec">
-                @if($product->spec)
+                @if($product->spec->isNotEmpty())
                     <div class="flex centerv item spec-btn">
                         <p>规格</p>
                         <div class="sp">
@@ -207,14 +207,14 @@
         });
 
         @if($product->type == 1)
-            var @if($product->spec) spec = $('input[name="spec"]:checked').attr('price'), @else spec = 0,@endif
+            var @if($product->spec->isNotEmpty()) spec = $('input[name="spec"]:checked').attr('price'), @else spec = 0,@endif
                 pack = $("input[name='packing']:checked"),
                 price= $('.price'),
                 original_price = $('#original_price');
             price.html("总计：¥ " + (Number(spec)+Number(pack.attr('price'))+15).toFixed(2));
             original_price.val((Number(spec)+Number(pack.attr('price'))+15).toFixed(2));
             $('input').change(function () {
-                var @if($product->spec) spec = $('input[name="spec"]:checked').attr('price'), @else spec = 0,@endif
+                var @if($product->spec->isNotEmpty()) spec = $('input[name="spec"]:checked').attr('price'), @else spec = 0,@endif
                 pack = $("input[name='packing']:checked");
                 price.html("总计：¥ " + (Number(spec)+Number(pack.attr('price'))+15).toFixed(2));
                 original_price.val((Number(spec)+Number(pack.attr('price'))+15).toFixed(2));

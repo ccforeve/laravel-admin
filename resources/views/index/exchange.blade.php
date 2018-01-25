@@ -29,7 +29,7 @@
                     <h2>积分兑换商品</h2>
                     <div class="flexitemv centerv text">
                         <h3 class="flexitemv center">购买时可使用积分消费1积分等于1元钱</h3>
-                        <a href="/" class="flex center green">前往购买</a>
+                        <a href="/index" class="flex center green">前往购买</a>
                     </div>
                 </div>
             </div>
