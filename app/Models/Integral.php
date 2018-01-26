@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Integral extends Model
 {
+    protected $fillable = ['order_id', 'user_id', 'integral', 'type'];
+
     public function order(  )
     {
         return $this->belongsTo(Order::class);

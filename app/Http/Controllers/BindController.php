@@ -69,7 +69,7 @@ class BindController extends Controller
         session(['bank_code' => $rand]);
         $appid = 1400037875;
         $appkey = "f98b59234537f5bd3ab6850e1e2c1e9d";
-        $this->sms($appid, $appkey, $phone, 32739, [$rand, '绑定银行卡'], '获取验证码');
+        self::sms($appid, $appkey, $phone, 32739, [$rand, '绑定银行卡'], '获取验证码');
 
         return ['state' => 0, 'error' => '已发送验证码'];
     }

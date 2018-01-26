@@ -30,7 +30,9 @@ Route::middleware(['simulation', 'wechat.oauth:snsapi_userinfo', 'userinfo'])->g
     //支付宝准备支付页面
     $route->get('alipay_ready/{order}/{order_pay}', 'PayController@aliReady')->name('index.alipay_ready');
     //支付
-    $route->get('pay/{type}/{order}/{order_pay}', 'PayController@pay')->name('index.pay');
+    $route->get('pay/{type}/{order_pay}', 'PayController@pay')->name('index.pay');
+    //支付结果跳转
+    $route->get('order_result/{state}/{order}', 'OrdersController@orderResult')->name('index.order_result');
     //我的地址
     $route->resource('address', 'AddressController');
     //选择地址

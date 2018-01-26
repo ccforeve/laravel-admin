@@ -7,7 +7,7 @@ use App\Classes\Sms\SmsSender;
 trait Notice
 {
     //发送短信
-    public function sms( $appid, $appkey, $phone, $templId, $params, $notice_msg )
+    public static function sms( $appid, $appkey, $phone, $templId, $params, $notice_msg )
     {
         $sms = new SmsSender($appid, $appkey);
         $result = $sms->sendWithParam("86", $phone, $templId, $params);

@@ -9,7 +9,7 @@ class User extends Authenticatable
 {
     use Notifiable;
 
-        protected $fillable = ['bank_name', 'bank_number', 'bank_username'];
+        protected $fillable = ['openid', 'bank_name', 'bank_number', 'bank_username', 'subscribe'];
 
     /**
      * 推广人

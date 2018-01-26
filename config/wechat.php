@@ -115,7 +115,7 @@ return [
          'default' => [
              'sandbox'            => env('WECHAT_PAYMENT_SANDBOX', false),
              'app_id'             => env('WECHAT_PAYMENT_APPID', ''),
-             'mch_id'             => env('WECHAT_PAYMENT_MCH_ID', 'your-mch-id'),
+             'mch_id'             => env('WECHAT_PAYMENT_MCH_ID', '1482887062'),
              'key'                => env('WECHAT_PAYMENT_KEY', 'key-for-signature'),
              'cert_path'          => env('WECHAT_PAYMENT_CERT_PATH', app_path('Cert/apiclient_cert.pem')),    // XXX: 绝对路径！！！！
              'key_path'           => env('WECHAT_PAYMENT_KEY_PATH', app_path('Cert/apiclient_key.pem')),      // XXX: 绝对路径！！！！

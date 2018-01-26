@@ -9,7 +9,7 @@
 namespace App\Http\Controllers;
 
 
-use App\Http\Controllers\TraitFunction\Notice;
+use App\Http\TraitFunction\Notice;
 use App\Models\Address;
 use App\Models\Integral;
 use App\Models\Order;
@@ -19,6 +19,7 @@ use App\Models\UseIntegral;
 use App\Models\User;
 use EasyWeChat\Factory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Yansongda\Pay\Pay;
 
 class PayNotifyController extends Controller
@@ -31,7 +32,7 @@ class PayNotifyController extends Controller
      */
     public function wechatNotify()
     {
-        $app = Factory::officialAccount(config('wechat'));
+        $app = Factory::payment(config('wechat.payment.default'));
         $response = $app->handlePaidNotify(function ($message, $fail) {
             // 使用通知里的 "微信支付订单号" 或者 "商户订单号" 去自己的数据库找到订单
             $order_id = OrderPay::where('number', $message['out_trade_no'])->value('order_id');
@@ -50,23 +51,23 @@ class PayNotifyController extends Controller
 
             // 用户是否支付成功
             if ($message['result_code'] === 'SUCCESS') {
-                $this->commonNotify($order, $message['out_trade_no'], $message['transaction_id']);
+                self::pay_notify($order, $message['out_trade_no'], $message['transaction_id']);
 
                 //发送微信模板消息
-                $template_data = [
-                    'touser' => User::where('id', $order->user_id)->value('openid'),
-                    'template_id' => 'kRHujmBG4w9tgHdaj2iH7_CREQ9cUCxrx_ikbE1ojK4',
-                    'url' => 'http://www.meifusp.com',
-                    'data' => [
-                        "first"     =>  "恭喜您支付成功！我们将尽快为您打包商品，准备发货。",
-                        "keyword1"  =>  Product::where('id', $order->product_id)->value('name'),
-                        "keyword2"  =>  "{$order->pay_price}元",
-                        "keyword3"  =>  date('Y-m-d H:i:s'),
-                        "remark"    =>  "如有任何问题，请您联系在线客服。感谢您对我们的信赖与支持，期待您下次光临！",
-                    ]
-                ];
-                $app = Factory::officialAccount(config('wechat'));
-                $app->template_message->send($template_data);
+//                $template_data = [
+//                    'touser' => User::where('id', $order->user_id)->value('openid'),
+//                    'template_id' => 'kRHujmBG4w9tgHdaj2iH7_CREQ9cUCxrx_ikbE1ojK4',
+//                    'url' => 'http://www.meifusp.com',
+//                    'data' => [
+//                        "first"     =>  "恭喜您支付成功！我们将尽快为您打包商品，准备发货。",
+//                        "keyword1"  =>  Product::where('id', $order->product_id)->value('name'),
+//                        "keyword2"  =>  "{$order->pay_price}元",
+//                        "keyword3"  =>  date('Y-m-d H:i:s'),
+//                        "remark"    =>  "如有任何问题，请您联系在线客服。感谢您对我们的信赖与支持，期待您下次光临！",
+//                    ]
+//                ];
+//                $app = Factory::officialAccount(config('wechat'));
+//                $app->template_message->send($template_data);
             }
 
             return true; // 返回处理完成
@@ -86,7 +87,7 @@ class PayNotifyController extends Controller
         if($verify) {
             $order_id = OrderPay::where('number', $request->out_trade_no)->value('order_id');
             $order = Order::find($order_id);
-            $this->commonNotify($order, $request->out_trade_no, $request->trade_no);
+            self::pay_notify($order, $request->out_trade_no, $request->trade_no);
         }
 
     }
@@ -105,7 +106,7 @@ class PayNotifyController extends Controller
      * @param $out_trade_no
      * @param $transaction_id
      */
-    public function commonNotify($order, $out_trade_no, $transaction_id)
+    public static function pay_notify($order, $out_trade_no, $transaction_id)
     {
         OrderPay::where('number', $out_trade_no)->update(['status' => 1, 'trade_no' => $transaction_id]);
         // 订单支付状态修改为已经支付状态
@@ -114,8 +115,13 @@ class PayNotifyController extends Controller
         $order->save(); // 保存订单
         //商品数量减一
         Product::where('id', $order->product_id)->decrement('stock');
+        //销售量加一
+        Product::where('id', $order->product_id)->increment('buy_count');
         //修改使用积分状态
-        UseIntegral::where('order_id', $order->id)->update(['status' => 1]);
+        $find_user_intrgral = UseIntegral::where('order_id', $order->id)->first();
+        if($find_user_intrgral) {
+            UseIntegral::where('order_id', $order->id)->update([ 'status' => 1 ]);
+        }
         //经销商或普通用户获得积分
         $p_dealer = User::where('id', $order->dealer_id)->first();
         if($order->product_type == 1) {
@@ -150,11 +156,10 @@ class PayNotifyController extends Controller
                 }
             }
         }
-
         //发送短信通知
         $address = Address::where('id', $order->address_id)->first();
-        $appid = 1400058384;
-        $appkey = "ea50aedaecf4b8821410bb4822b71d20";
-        $this->sms($appid, $appkey, $address->phone, 71275, [], '购买成功通知');
+        $appid = 1400037875;
+        $appkey = "f98b59234537f5bd3ab6850e1e2c1e9d";
+        self::sms($appid, $appkey, $address->phone, 71275, [], '购买成功通知');
     }
 }

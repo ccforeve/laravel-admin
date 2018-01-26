@@ -30,24 +30,28 @@ class PayController extends Controller
     /**
      * 支付
      * @param $type
-     * @param Order $order
      * @param OrderPay $orderPay
      * @throws \EasyWeChat\Kernel\Exceptions\InvalidConfigException
      */
-    public function pay( $type, Order $order, OrderPay $orderPay )
+    public function pay( $type, OrderPay $orderPay )
     {
+        $order = Order::find($orderPay->order_id);
         $body = Product::where('id', $order->product_id)->value('name');
         //微信支付
         if($type == 1) {
             $config_biz = [
                 'body' => $body,
                 'out_trade_no' => $orderPay->number,
-                'total_fee' => $order->pay_price,
+//                'total_fee' => $order->pay_price * 100,
+                'total_fee' => 1,
                 'notify_url' => route('wechat_notify'), // 支付结果通知网址，如果不设置则会使用配置里的默认地址
                 'trade_type' => 'JSAPI',
                 'openid' => User::where('id', $order->user_id)->value('openid'),
             ];
-            $this->wechatPay($config_biz);
+            $ret = $this->wechatPay($config_biz);
+            $order_id = $orderPay->order_id;
+
+            return view('index.wechat_pay', compact('ret', 'order_id'));
         } elseif($type == 2) {//支付宝支付
             $config_biz = [
                 'out_trade_no' => $orderPay->number,    // 订单号
@@ -62,11 +66,16 @@ class PayController extends Controller
      * 微信公众号支付
      * @param $post_data
      * @throws \EasyWeChat\Kernel\Exceptions\InvalidConfigException
+     * @return mixed
      */
     public function wechatPay($post_data)
     {
-        $app = Factory::payment(config('wechat'));
-        $app->order->unify($post_data);
+        $app = Factory::payment(config('wechat.payment.default'));
+        $result = $app->order->unify($post_data);
+        $jssdk = $app->jssdk;
+        $json = $jssdk->bridgeConfig($result['prepay_id']);
+
+        return $json;
     }
 
     /**

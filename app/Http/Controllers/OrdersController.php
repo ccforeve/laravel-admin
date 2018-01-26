@@ -194,7 +194,7 @@ class OrdersController extends Controller
         if($first_pay) {
             if ( $add ) {
                 if($pay_type == 1) {
-                    return [ 'state' => 0, 'url' => route('index.pay', [ 'type' => $pay_type, 'order' => $order_id, 'order_pay' => $add->id ]) ];
+                    return [ 'state' => 0, 'url' => route('index.pay', [ 'type' => $pay_type, 'order_pay' => $add->id ]) ];
                 } else {
                     return [ 'state' => 0, 'url' => route('index.alipay_ready', [ 'order' => $order_id, 'order_pay' => $add->id ]) ];
                 }
@@ -203,7 +203,7 @@ class OrdersController extends Controller
         } else {
             if ( $add ) {
                 if($pay_type == 1) {
-                    return response()->json([ 'state' => 0, 'url' => route('index.pay', [ 'type' => $pay_type, 'order' => $order_id, 'order_pay' => $add->id ]) ]);
+                    return response()->json([ 'state' => 0, 'url' => route('index.pay', [ 'type' => $pay_type, 'order_pay' => $add->id ]) ]);
                 } else {
                     return response()->json([ 'state' => 0, 'url' => route('index.alipay_ready', [ 'order' => $order_id, 'order_pay' => $add->id ]) ]);
                 }
@@ -212,4 +212,8 @@ class OrdersController extends Controller
         }
     }
 
+    public function orderResult( $state, Order $order )
+    {
+        return view('index.order_result', compact('state', 'order'));
+    }
 }
