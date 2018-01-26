@@ -101,7 +101,7 @@ SCRIPT;
         Admin::script($this->script());
         $url = route('admin.edit_address', $this->id);
         $token = csrf_token();
-        return "<a class='btn btn-xs btn-success fa fa-check' data-token='$token' data-url='$url' data-name='$this->name' data-phone='$this->phone' data-province='$this->provision' data-details='$this->details'>查看地址</a>";
+        return "<a class='btn btn-xs btn-success fa' data-token='$token' data-url='$url' data-name='$this->name' data-phone='$this->phone' data-province='$this->provision' data-details='$this->details'>查看地址</a>";
     }
 
     public function __toString()

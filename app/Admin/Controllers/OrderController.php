@@ -77,7 +77,7 @@ class OrderController extends Controller
     protected function grid()
     {
         return Admin::grid(Order::class, function (Grid $grid) {
-            $grid->model()->where('complete', 1);
+            $grid->model()->where('complete', 1)->orderBy('created_at', 'desc');
 
             $grid->id('ID')->sortable();
             $grid->product()->id('产品ID');
@@ -142,6 +142,28 @@ class OrderController extends Controller
             $grid->remark('备注')->editable();
             $grid->updated_at('最后更新时间');
 
+            //分页
+            $grid->paginate(15);
+            $grid->perPages([10, 15]);
+
+            //数据过滤
+            $grid->filter(function($filter) {
+                $filter->where(function ($query) {
+                    // 在这里添加字段过滤器
+                    $query->whereHas('address', function ($query) {
+                        $query->where('name', 'like', "%{$this->input}%")->orWhere('phone', 'like', "%{$this->input}%");
+                    });
+                }, '收件人或手机号');
+
+                $filter->equal('product_type', '商品类型')->radio([
+                    ''   => 'All',
+                    1    => '免费领取',
+                    2    => '套装',
+                    3    => '体验商品',
+                ]);
+            });
+
+            //扩展按钮
             $grid->actions(function ($actions) {
                 $actions->disableDelete();
                 // 添加操作
