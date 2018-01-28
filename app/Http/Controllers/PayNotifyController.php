@@ -82,22 +82,13 @@ class PayNotifyController extends Controller
      */
     public function aliNotify(Request $request)
     {
-        $pay = new Pay(config('alipay.alipay'));
-        $verify = $pay->driver('alipay')->gateway()->verify($request->all());
+        $alipay = Pay::alipay(config('alipay.alipay'));
+        $verify = $alipay->success();
         if($verify) {
             $order_id = OrderPay::where('number', $request->out_trade_no)->value('order_id');
             $order = Order::find($order_id);
             self::pay_notify($order, $request->out_trade_no, $request->trade_no);
         }
-
-    }
-
-    /**
-     * 支付宝支付同步通知
-     */
-    public function aliRetrun()
-    {
-
     }
 
     /**
@@ -137,17 +128,17 @@ class PayNotifyController extends Controller
             if($order->p_id) {
                 User::where('id', $order->p_id)->update([ 'is_extension' => 1 ]);
             }
-        } elseif($order->product_id == 2) {
+        } elseif($order->product_type == 2) {
             //经销商获得套装类型积分
             if($order->dealer_id){
                 //经销商比例
                 if(!empty($p_dealer->scale)) $scale = $p_dealer->scale / 100;
                 else $scale = 0.3;
-
                 $integral = [
                     'order_id' =>  $order->id, 'user_id'  =>  $order->dealer_id, 'integral'  =>  ceil($order->pay_price * $scale), 'type'  =>  2
                 ];
                 Integral::create($integral);
+
                 if($p_dealer->dealer_id){
                     $integral = [
                         'order_id' =>  $order->id, 'user_id'  =>  $p_dealer->dealer_id, 'integral'  =>  ceil($order->pay_price * 0.05), 'type'  =>  2

@@ -2,6 +2,8 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Extensions\Excel\ExcelExpoter;
+use App\Admin\Extensions\Tools\Logistic;
 use App\Models\Address;
 use App\Models\Order;
 use App\Admin\Extensions\Tools\OrderAddress;
@@ -155,19 +157,42 @@ class OrderController extends Controller
                     });
                 }, '收件人或手机号');
 
+                $filter->equal('status', '支付状态')->radio([
+                    ''   => '全部',
+                    0    => '未支付',
+                    1    => '已支付',
+                    2    => '已退款',
+                ]);
+
                 $filter->equal('product_type', '商品类型')->radio([
-                    ''   => 'All',
+                    ''   => '全部',
                     1    => '免费领取',
                     2    => '套装',
                     3    => '体验商品',
                 ]);
+
+                $filter->equal('confirm', '商品类型')->radio([
+                    ''   => '全部',
+                    0    => '未发货',
+                    1    => '已发货',
+                    2    => '已收货',
+                ]);
             });
 
+            $grid->exporter(new ExcelExpoter('未发货订单'));
+
+            //禁用添加按钮
+            $grid->disableCreation();
             //扩展按钮
             $grid->actions(function ($actions) {
                 $actions->disableDelete();
                 // 添加操作
                 $actions->append(new OrderAddress($actions->row->address['id'], $actions->row->address['name'], $actions->row->address['phone'],$actions->row->address['province'], $actions->row->address['detail']));
+                if($actions->row->logistic_id) {
+                    $actions->append(new Logistic());
+                } else {
+//                    $actions->append();
+                }
             });
         });
     }

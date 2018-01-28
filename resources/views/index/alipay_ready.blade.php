@@ -9,7 +9,7 @@
         <img src="/index_images/background.png">
     </div>
     <div class="flex center bottom">
-        <a href="/" class="flex center">返回首页</a>
+        <a href="/index" class="flex center">返回首页</a>
     </div>
 </div>
 <script src="https://cdn.bootcss.com/jquery/2.0.0/jquery.min.js"></script>
@@ -21,7 +21,7 @@
     @if(strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') !== false)
 
     @else
-        window.location.href = "{{ route('index.pay', ['type' => 2, 'order' => request()->order, 'order_pay' => request()->order_pay]) }}";
+        window.location.href = "{{ route('index.pay', ['type' => 2, 'order_pay' => request()->order_pay]) }}";
     @endif
 </script>
 </html>

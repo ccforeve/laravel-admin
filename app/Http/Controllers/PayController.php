@@ -32,6 +32,7 @@ class PayController extends Controller
      * @param $type
      * @param OrderPay $orderPay
      * @throws \EasyWeChat\Kernel\Exceptions\InvalidConfigException
+     * @return mixed
      */
     public function pay( $type, OrderPay $orderPay )
     {
@@ -55,10 +56,11 @@ class PayController extends Controller
         } elseif($type == 2) {//支付宝支付
             $config_biz = [
                 'out_trade_no' => $orderPay->number,    // 订单号
-                'total_amount' => $order->pay_price,    // 订单金额，单位：元
+//                'total_amount' => $order->pay_price,    // 订单金额，单位：元
+                'total_amount' => 0.01,    // 订单金额，单位：元
                 'subject' => $body,                     // 订单商品标题
             ];
-            $this->aliPay($config_biz);
+            return $this->aliPay($config_biz);
         }
     }
 

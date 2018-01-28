@@ -19,6 +19,7 @@ use App\Models\Specification;
 use App\Models\UseIntegral;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Yansongda\Pay\Pay;
 
 class OrdersController extends Controller
 {
@@ -196,7 +197,7 @@ class OrdersController extends Controller
                 if($pay_type == 1) {
                     return [ 'state' => 0, 'url' => route('index.pay', [ 'type' => $pay_type, 'order_pay' => $add->id ]) ];
                 } else {
-                    return [ 'state' => 0, 'url' => route('index.alipay_ready', [ 'order' => $order_id, 'order_pay' => $add->id ]) ];
+                    return [ 'state' => 0, 'url' => route('index.alipay_ready', [ 'order_pay' => $add->id ]) ];
                 }
             }
             return [ 'state' => 500 ];
@@ -205,15 +206,37 @@ class OrdersController extends Controller
                 if($pay_type == 1) {
                     return response()->json([ 'state' => 0, 'url' => route('index.pay', [ 'type' => $pay_type, 'order_pay' => $add->id ]) ]);
                 } else {
-                    return response()->json([ 'state' => 0, 'url' => route('index.alipay_ready', [ 'order' => $order_id, 'order_pay' => $add->id ]) ]);
+                    return response()->json([ 'state' => 0, 'url' => route('index.alipay_ready', [ 'order_pay' => $add->id ]) ]);
                 }
             }
             return response()->json(['state' => 500, 'error' => '支付出错']);
         }
     }
 
-    public function orderResult( $state, Order $order )
+    /**
+     * 微信支付结果跳转
+     * @param $state
+     * @param Order $order
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function wechatOrderResult( $state, Order $order )
     {
-        return view('index.order_result', compact('state', 'order'));
+        return view('index.wechat_order_result', compact('state', 'order'));
+    }
+
+    public function alipayOrderResult(Request $request)
+    {
+        $alipay = Pay::alipay(config('alipay.alipay'));
+        $verify = $alipay->success();
+        if($verify) {
+            $order = '';
+            $state = 'ok';
+        } else {
+            $order_id=  OrderPay::where('trade_no', $request->trade_no)->value('order_id');
+            $order = Order::find($order_id);
+            $state = 'fail';
+        }
+
+        return view('index.alipay_order_result', compact('order', 'state'));
     }
 }
