@@ -3,13 +3,17 @@
 namespace App\Admin\Controllers;
 
 use App\Admin\Extensions\Excel\ExcelExpoter;
-use App\Admin\Extensions\Tools\Logistic;
+use App\Admin\Extensions\Tools\Delivery;
+use App\Classes\Kd\Kuaidi;
+use App\Http\TraitFunction\Notice;
 use App\Models\Address;
+use App\Models\Logistic;
 use App\Models\Order;
 use App\Admin\Extensions\Tools\OrderAddress;
 use App\Models\OrderAttr;
-use App\Models\OrderRefund;
-use App\Models\Specification;
+use App\Models\OrderPay;
+use Carbon\Carbon;
+use EasyWeChat\Factory;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Facades\Admin;
@@ -17,10 +21,11 @@ use Encore\Admin\Layout\Content;
 use App\Http\Controllers\Controller;
 use Encore\Admin\Controllers\ModelForm;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 class OrderController extends Controller
 {
-    use ModelForm;
+    use ModelForm, Notice;
 
     /**
      * Index interface.
@@ -115,7 +120,7 @@ class OrderController extends Controller
             $grid->pay_price('支付金额/元');
             $grid->status('支付状态')->display(function($status){
                 if($status == 0) return '<color style="color:red">未支付</color>';
-                elseif($status == 1) return '<color style="color:green">已支付</color>';
+                elseif($status == 1) return '<color style="color:green;font-weight: bold;">已支付</color>';
                 elseif($status == 2) return '<color style="color:orange">已退款</color>';
             });
             $grid->is_status('订单状态')->display(function ($is_status) {
@@ -124,10 +129,10 @@ class OrderController extends Controller
                 elseif($is_status == 2) return '<color style="color:orange">收货退款</color>';
                 elseif($is_status == 3) return '<color style="color:orange">取消订单</color>';
             });
-            $grid->comfirm('发货状态')->display(function ($comfirm) {
-                if ( $comfirm == 0 ) return '<color style="color:red">未发货</color>';
-                elseif ( $comfirm == 1 ) return '<color style="color:green">已发货</color>';
-                elseif ( $comfirm == 2 ) return '<color style="color:orange">已退款</color>';
+            $grid->confirm('发货状态')->display(function ($confirm) {
+                if ( $confirm == 0 ) return '<color style="color:red">未发货</color>';
+                elseif ( $confirm == 1 ) return '<color style="color:green;font-weight: bold;">已发货</color>';
+                elseif ( $confirm == 2 ) return '<color style="color:orange">已退款</color>';
             });
 //            $grid->order_refund_id('退款状态')->display(function($refund){
 //                if($refund) {
@@ -186,12 +191,21 @@ class OrderController extends Controller
             //扩展按钮
             $grid->actions(function ($actions) {
                 $actions->disableDelete();
+                $actions->disableEdit();
+
+                $url = route('admin.order_detail', $actions->row->id);
+                $actions->append("<a href={$url} class='btn btn-xs btn-success fa font'>详情</a>");
                 // 添加操作
-                $actions->append(new OrderAddress($actions->row->address['id'], $actions->row->address['name'], $actions->row->address['phone'],$actions->row->address['province'], $actions->row->address['detail']));
-                if($actions->row->logistic_id) {
-                    $actions->append(new Logistic());
-                } else {
-//                    $actions->append();
+                if($actions->row->status <> 0) {
+                    //查看地址
+                    $actions->append(new OrderAddress($actions->row->address[ 'id' ], $actions->row->address[ 'name' ], $actions->row->address[ 'phone' ], $actions->row->address[ 'province' ], $actions->row->address[ 'detail' ]));
+                }
+                if($actions->row->confirm == 0 && $actions->row->status == 1) {
+                    //发货
+                    $actions->append(new Delivery($actions->row->id));
+                } elseif($actions->row->confirm <> 0) {
+                    //查看物流
+                    $actions->append(new \App\Admin\Extensions\Tools\Logistic($actions->row->logistic_id));
                 }
             });
         });
@@ -205,17 +219,102 @@ class OrderController extends Controller
     protected function form()
     {
         return Admin::form(Order::class, function (Form $form) {
-
             $form->display('id', 'ID');
             $form->text('remark', '备注');
-            $form->display('created_at', 'Created At');
-            $form->display('updated_at', 'Updated At');
         });
     }
 
+    /**
+     * 订单详情页
+     * @param Order $order
+     * @return Content
+     */
+    public function detail( $order )
+    {
+        return Admin::content(function (Content $content) use($order) {
+            $content->header('订单详情');
+
+            $order = Order::with('product','address','orderAttr.specs','logistic')->where('id', $order)->first();
+
+            $order_pays = OrderPay::where('order_id', $order->id)->get();
+
+            $content->body(view('admin.order_detail', compact('order', 'order_pays')));
+        });
+    }
+
+    /**
+     * 修改收货地址
+     * @param Request $request
+     * @param Address $address
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function editAddress(Request $request, Address $address)
     {
         $address->update($request->all());
+
         return response()->json(['state' => 0]);
+    }
+
+    /**
+     * 订单列表填写快递信息
+     * @param Request $request
+     * @param $order
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidArgumentException
+     */
+    public function delivery( Request $request, $order)
+    {
+        $add_logistic = Logistic::create($request->all());
+        Order::where('id', $order)->update(['logistic_id'=>$add_logistic->id, 'confirm' => 1, 'receipt_at'=>Carbon::now()->addDays(7)]);
+
+        $order = Order::with('user', 'product', 'logistic', 'address')->where('id', $order)->first();
+
+        //推送消息
+        if($order->user->subscribe) {
+            $app = Factory::officialAccount(config('wechat'));
+            $app->template_message->send([
+                'touser'      => "{$order->user->openid}",
+                'template_id' => '3abfbjwBmy2Y7THJvDSUBddwXYCrskrcSc6_hasOALA',
+                'url'         => config('app.url'),
+                'data'        => [
+                    'first' => '您购买的商品已发货，查看物流信息请点击详情',
+                    'key1' => $order->product->name,
+                    'key2' => config("system.express_company.{$order->logistic->express_name}"),
+                    'key3' => $order->logistic->express_number,
+                    'key4' => $order->address->province . $order->address->detail,
+                    'key5' => '如有任何问题，请您联系在线客服。感谢您对我们的信赖与支持，期待您下次光临！'
+                ],
+            ]);
+            //发送短信通知
+            $appid = 1400037875;
+            $appkey = "f98b59234537f5bd3ab6850e1e2c1e9d";
+            self::sms($appid, $appkey, $order->address->phone, 72565, [$order->product->name], '订单添加物流通知');
+        }
+
+        return response()->json(['state' => 0]);
+    }
+
+    /**
+     * 修改快递信息
+     * @param Request $request
+     * @param Logistic $logistic
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function editExpress(Request $request, Logistic $logistic )
+    {
+        $logistic->update($request->all());
+
+        return redirect()->back();
+    }
+
+    public function seeExpress( Logistic $logistic )
+    {
+        $kd = new Kuaidi();
+        $res = json_decode($kd->getTransport($logistic->express_name, $logistic->express_number),true);
+        if($res['status']==1){
+            $datas = $res['data'];
+
+            return view('admin.order_truck', compact('datas'));
+        }
     }
 }
